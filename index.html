@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TinyLinker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    #copy-message {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TinyLinker - URL Shortener.</h1>
+    <input type="text" id="link-input" placeholder="Enter a URL to shorten">
+    <button onclick="shortenLink()">Shorten Link</button>
+    <p id="output"></p>
+    <button id="copy-btn" onclick="copyToClipboard()" style="display: none;">Copy Shortened Link</button>
+    <p id="copy-message"></p>
+  </div>
+
+  <script>
+    function shortenLink() {
+      const linkInput = document.getElementById('link-input');
+      const url = linkInput.value;
+      const apiUrl = `https://www.shareaholic.com/v2/share/shorten_link?apikey=2485c2e5751e30fe0de0626114aefc71&url=${encodeURIComponent(url)}`;
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.data) {
+            document.getElementById('output').textContent = `Shortened link: ${data.data}`;
+            document.getElementById('copy-btn').style.display = 'inline-block';
+            document.getElementById('copy-message').textContent = '';
+          } else {
+            let errorMessage = `Error: ${data.errors.detail}`;
+            if (errorMessage === "Error: undefined") {
+              errorMessage = "Error: Incorrect URL.";
+            }
+            document.getElementById('output').textContent = errorMessage;
+            document.getElementById('copy-btn').style.display = 'none';
+            document.getElementById('copy-message').textContent = '';
+          }
+        })
+        .catch(error => {
+          document.getElementById('output').textContent = `Error: ${error}`;
+          document.getElementById('copy-btn').style.display = 'none';
+          document.getElementById('copy-message').textContent = '';
+        });
+    }
+
+    function copyToClipboard() {
+      const shortUrl = document.getElementById('output').textContent.split(': ')[1];
+      navigator.clipboard.writeText(shortUrl);
+      document.getElementById('copy-message').textContent = 'Shortened link copied to clipboard!';
+    }
+  </script>
+</body>
+</html>
